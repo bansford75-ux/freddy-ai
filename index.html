@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#212121">
+<title>Freddy AI</title>
+<style>
+@font-face{font-family:Coolvetica;src:local("Coolvetica"),local("Coolvetica Regular")}
+:root{--bg:#212121;--sidebar:#171717;--surface:#2f2f2f;--surface2:#303030;--border:#424242;--text:#ececec;--muted:#a9a9a9;--hover:#2a2a2a;--user:#2f2f2f}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text)}
+body{font-family:Coolvetica,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif}
+body.light{--bg:#f7f7f8;--sidebar:#fff;--surface:#fff;--surface2:#eee;--border:#ddd;--text:#202123;--muted:#666;--hover:#eee;--user:#e9e9e9}
+button,input,textarea{font:inherit}button{color:inherit}.app{height:100dvh;display:flex;overflow:hidden}
+.sidebar{width:270px;background:var(--sidebar);display:flex;flex-direction:column;padding:10px;gap:8px;z-index:30;border-right:1px solid var(--border)}
+.newchat{height:44px;display:flex;align-items:center;gap:11px;border:1px solid var(--border);background:transparent;padding:0 13px;border-radius:10px;cursor:pointer}
+.newchat:hover,.sidebtn:hover,.chatrow:hover{background:var(--hover)}
+.search{display:flex;align-items:center;gap:8px;color:var(--muted);padding:9px 11px;border-radius:9px;background:var(--surface);border:1px solid var(--border)}
+.search input{width:100%;background:none;border:0;outline:0;color:var(--text)}.history{flex:1;overflow:auto}.sectionlabel{font-size:11px;color:var(--muted);padding:10px 8px 5px}
+.chatrow{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text)}
+.chatrow span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chatrow.active{background:var(--hover)}
+.sidebottom{display:grid;gap:2px;border-top:1px solid var(--border);padding-top:7px}.sidebtn{border:0;background:transparent;text-align:left;padding:10px;border-radius:8px;cursor:pointer}
+.main{min-width:0;flex:1;display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);z-index:10;border-bottom:1px solid transparent}
+.top-left{display:flex;align-items:center;gap:8px}.menu{display:none;border:0;background:none;font-size:21px;cursor:pointer}.brand{font-weight:700;font-size:17px}.model{font-size:14px;color:var(--muted);margin-left:4px}
+.top-actions{display:flex;gap:2px}.iconbtn{border:0;background:transparent;width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:17px}.iconbtn:hover{background:var(--hover)}
+.chat{flex:1;overflow:auto;padding:30px 20px 165px;scroll-behavior:smooth}.empty{max-width:760px;margin:14vh auto 0;text-align:center}
+.face{width:74px;height:66px;margin:0 auto 22px;border-radius:20px;background:linear-gradient(145deg,#34363d,#101114);border:1px solid #555;display:grid;place-items:center;box-shadow:0 12px 40px #0008;animation:float 4s ease-in-out infinite}
+.promptface{font-weight:900;font-size:19px;color:#e8edf8;letter-spacing:-2px}.empty h1{font-size:30px;font-weight:600;margin:0 0 26px}
+.suggestions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}.suggestions button{border:1px solid var(--border);background:var(--surface);padding:10px 13px;border-radius:10px;cursor:pointer}
+.message{max-width:820px;margin:0 auto 27px;display:flex;gap:13px;line-height:1.65;animation:rise .2s ease}.message.user{justify-content:flex-end}
+.avatar{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:#444;display:grid;place-items:center;font-size:12px}.user .avatar{order:2;background:#eee;color:#222}
+.content{max-width:calc(100% - 44px);overflow-wrap:anywhere}.user .content{background:var(--user);padding:9px 14px;border-radius:18px;max-width:min(720px,85%)}.ai .content{padding-top:1px}
+.content pre{background:#171717;border:1px solid #444;padding:14px;border-radius:10px;overflow:auto;position:relative}.content code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.content p{margin:.2em 0 .8em}.content ul,.content ol{padding-left:22px}
+.tools{display:flex;gap:4px;margin-top:7px}.tool{border:0;background:transparent;color:var(--muted);padding:5px 7px;border-radius:7px;cursor:pointer;font-size:12px}.tool:hover{background:var(--hover);color:var(--text)}
+.attachment{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);padding:7px 9px;border-radius:9px;margin-bottom:8px;max-width:320px}.attachment img{width:42px;height:42px;object-fit:cover;border-radius:6px}
+.composer-wrap{position:absolute;bottom:0;left:0;right:0;padding:15px 20px 18px;background:linear-gradient(transparent,var(--bg) 28%);z-index:5}
+.composer{max-width:820px;margin:auto;background:var(--surface);border:1px solid #4a4a4a;border-radius:24px;padding:7px 9px;box-shadow:0 5px 30px #0005}
+.preview{display:none;gap:8px;overflow:auto;padding:3px 4px 7px}.preview.show{display:flex}.preview-item{position:relative}.preview-item img{width:60px;height:60px;object-fit:cover;border-radius:8px}.remove{position:absolute;top:-5px;right:-5px;border:0;border-radius:50%;background:#444;color:#fff;width:20px;height:20px;cursor:pointer}
+.inputrow{display:flex;align-items:flex-end;gap:6px}textarea{flex:1;resize:none;min-height:42px;max-height:170px;background:transparent;border:0;outline:0;color:var(--text);padding:10px 6px;font-size:15px}
+.attach,.mic{border:0;background:transparent;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:21px}.attach:hover,.mic:hover{background:var(--hover)}
+.send{border:0;background:#fff;color:#111;width:34px;height:34px;border-radius:50%;cursor:pointer;font-weight:800;margin-bottom:3px}.send:disabled{opacity:.35}.hint{text-align:center;color:var(--muted);font-size:11px;margin-top:8px}
+.overlay{display:none;position:fixed;inset:0;background:#0008;z-index:25}.overlay.show{display:block}.typing{display:inline-flex;gap:4px;padding:8px 0}.typing i{width:6px;height:6px;background:#aaa;border-radius:50%;animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{opacity:.25;transform:translateY(-3px)}}@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}@keyframes float{50%{transform:translateY(-5px)}}
+@media(max-width:800px){.sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-105%);transition:transform .2s ease;box-shadow:20px 0 60px #000}.sidebar.open{transform:translateX(0)}.menu{display:block}.topbar{height:54px}.chat{padding:22px 12px 150px}.composer-wrap{padding:11px 10px 15px}.empty{margin-top:13vh}.empty h1{font-size:25px}.suggestions{padding:0 8px}.suggestions button{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+<button class="newchat" id="newChat">＋ <span>New chat</span></button>
+<label class="search">⌕ <input id="search" placeholder="Search chats"></label>
+<div class="history" id="history"></div>
+<div class="sidebottom">
+<button class="sidebtn" id="theme">☼ &nbsp; Theme</button>
+<button class="sidebtn" id="clearAll">⌫ &nbsp; Clear history</button>
+</div>
+</aside>
+<div class="overlay" id="overlay"></div>
+<section class="main">
+<header class="topbar">
+<div class="top-left"><button class="menu" id="menu">☰</button><div class="brand">Freddy <span class="model">AI</span></div></div>
+<div class="top-actions"><button class="iconbtn" id="voice" title="Voice input">🎙️</button><button class="iconbtn" id="clearCurrent" title="Clear chat">⌫</button></div>
+</header>
+<main class="chat" id="chat"></main>
+<div class="composer-wrap">
+<form class="composer" id="form">
+<div class="preview" id="preview"></div>
+<div class="inputrow">
+<input id="file" type="file" accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.html,.css" multiple hidden>
+<button class="attach" type="button" id="attach" title="Attach files">＋</button>
+<textarea id="input" rows="1" placeholder="Message Freddy..."></textarea>
+<button class="mic" type="button" id="mic" title="Voice input">🎙</button>
+<button class="send" id="send" type="submit">↑</button>
+</div>
+</form>
+<div class="hint">Freddy can make mistakes. Check important information.</div>
+</div>
+</section>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const chat=$("#chat"),input=$("#input"),form=$("#form"),file=$("#file"),preview=$("#preview"),sendBtn=$("#send");
+let conversations=JSON.parse(localStorage.getItem("freddy_chats")||"[]"),currentId=localStorage.getItem("freddy_current")||null,attachments=[],busy=false;
+
+function save(){localStorage.setItem("freddy_chats",JSON.stringify(conversations));localStorage.setItem("freddy_current",currentId||"")}
+function current(){return conversations.find(c=>c.id===currentId)}
+function fresh(){const c={id:crypto.randomUUID(),title:"New chat",messages:[],created:Date.now()};conversations.unshift(c);currentId=c.id;save();renderHistory();renderChat()}
+function esc(s=""){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+function md(s=""){
+ let x=esc(s);
+ x=x.replace(/```(?:\w+)?\n?([\s\S]*?)```/g,(_,c)=>`<pre><code>${c.trim()}</code></pre>`);
+ x=x.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/\*(.*?)\*/g,"<em>$1</em>").replace(/\n/g,"<br>");
+ return x;
+}
+function renderHistory(filter=""){
+ const h=$("#history");h.innerHTML="";
+ conversations.filter(c=>(c.title||"").toLowerCase().includes(filter.toLowerCase())).slice(0,100).forEach(c=>{
+  const b=document.createElement("div");b.className="chatrow"+(c.id===currentId?" active":"");b.innerHTML=`💬 <span>${esc(c.title||"New chat")}</span>`;
+  b.onclick=()=>{currentId=c.id;save();renderHistory($("#search").value);renderChat();closeSide()};h.appendChild(b);
+ });
+}
+function addMessage(m,i){
+ const row=document.createElement("div");row.className="message "+m.role;
+ const av=document.createElement("div");av.className="avatar";av.textContent=m.role==="user"?"You":"F";
+ const content=document.createElement("div");content.className="content";
+ if(m.image){const a=document.createElement("div");a.className="attachment";a.innerHTML=`<img src="${m.image}"><span>${esc(m.name||"Image")}</span>`;content.appendChild(a)}
+ const text=document.createElement("div");text.innerHTML=m.role==="assistant"?md(m.content):esc(m.content).replace(/\n/g,"<br>");content.appendChild(text);
+ if(m.role==="assistant"){const tools=document.createElement("div");tools.className="tools";tools.innerHTML='<button class="tool copy">Copy</button><button class="tool regen">Regenerate</button><button class="tool speak">🔊 Read aloud</button>';tools.querySelector(".copy").onclick=()=>navigator.clipboard?.writeText(m.content);tools.querySelector(".speak").onclick=()=>speak(m.content);tools.querySelector(".regen").onclick=()=>regenerate(i);content.appendChild(tools)}
+ row.append(av,content);chat.appendChild(row);
+}
+function renderChat(){
+ const c=current();chat.innerHTML="";
+ if(!c||!c.messages.length){
+  chat.innerHTML=`<section class="empty"><div class="face"><div class="promptface">&gt;_</div></div><h1>What can I help with?</h1><div class="suggestions"><button>Explain quantum physics simply</button><button>Help me build a website</button><button>Analyze this image</button><button>Help me study</button></div></section>`;
+  chat.querySelectorAll(".suggestions button").forEach(b=>b.onclick=()=>{input.value=b.textContent;input.focus()});return;
+ }
+ c.messages.forEach(addMessage);chat.scrollTop=chat.scrollHeight;
+}
+function renderPreview(){preview.innerHTML="";preview.classList.toggle("show",attachments.length>0);attachments.forEach((a,i)=>{const d=document.createElement("div");d.className="preview-item";d.innerHTML=`<img src="${a.data}"><button class="remove">×</button>`;d.querySelector(".remove").onclick=()=>{attachments.splice(i,1);renderPreview()};preview.appendChild(d)})}
+function readFile(f){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(f)})}
+async function send(){
+ if(busy)return;const text=input.value.trim();if(!text&&!attachments.length)return;
+ let c=current();if(!c){fresh();c=current()}if(c.title==="New chat")c.title=(text||"Attachment").slice(0,42);
+ const imgs=attachments.map(a=>a.data);c.messages.push({role:"user",content:text||"Please analyze the attached file(s).",image:attachments[0]?.data,name:attachments[0]?.name});
+ input.value="";input.style.height="auto";attachments=[];renderPreview();save();renderHistory();renderChat();busy=true;sendBtn.disabled=true;
+ const typing=document.createElement("div");typing.className="message assistant";typing.innerHTML='<div class="avatar">F</div><div class="content"><span class="typing"><i></i><i></i><i></i></span></div>';chat.appendChild(typing);chat.scrollTop=chat.scrollHeight;
+ const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),30000);
+ try{
+  const payload={messages:c.messages.map(m=>({role:m.role,content:m.content})),images:imgs};
+  const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),signal:ctl.signal});
+  const data=await r.json();if(!r.ok)throw new Error(data.error||"Request failed");
+  c.messages.push({role:"assistant",content:data.reply||"I didn't get a response."});
+ }catch(e){c.messages.push({role:"assistant",content:e.name==="AbortError"?"The request timed out. Please try again.":"I couldn't reach Freddy's AI backend right now. Check Vercel and your OPENAI_API_KEY."})}
+ finally{clearTimeout(timer);typing.remove();busy=false;sendBtn.disabled=false;save();renderChat();renderHistory()}
+}
+async function regenerate(i){
+ const c=current();if(!c||busy)return;const previous=c.messages[i-1];if(!previous)return;c.messages=c.messages.slice(0,i);save();renderChat();input.value=previous.content;await send()
+}
+function speak(text){if("speechSynthesis"in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.95;speechSynthesis.speak(u)}}
+function closeSide(){$("#sidebar").classList.remove("open");$("#overlay").classList.remove("show")}
+$("#newChat").onclick=fresh;
+$("#clearCurrent").onclick=()=>{if(current()){current().messages=[];current().title="New chat";save();renderChat();renderHistory()}};
+$("#clearAll").onclick=()=>{if(confirm("Clear all Freddy conversations?")){conversations=[];currentId=null;save();fresh()}};
+$("#search").oninput=e=>renderHistory(e.target.value);
+$("#attach").onclick=()=>file.click();
+file.onchange=async e=>{for(const f of [...e.target.files]){if(f.type.startsWith("image/"))attachments.push({data:await readFile(f),name:f.name})}file.value="";renderPreview()};
+form.onsubmit=e=>{e.preventDefault();send()};
+input.oninput=()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,170)+"px"};
+input.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}};
+$("#menu").onclick=()=>{$("#sidebar").classList.add("open");$("#overlay").classList.add("show")};$("#overlay").onclick=closeSide;
+$("#theme").onclick=()=>document.body.classList.toggle("light");
+function startVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Voice input isn't supported in this browser.");return}const r=new SR();r.lang=navigator.language||"en-US";r.interimResults=false;r.onresult=e=>{input.value=e.results[0][0].transcript;input.dispatchEvent(new Event("input"));input.focus()};r.start()}
+$("#voice").onclick=startVoice;$("#mic").onclick=startVoice;
+if(!conversations.length)fresh();else{if(!current())currentId=conversations[0].id;renderHistory();renderChat()}
+</script>
+</body>
+</html>
